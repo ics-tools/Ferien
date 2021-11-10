@@ -44,6 +44,9 @@ jobs:
       - name: Generate index tree
         run: python3 generate_index.py "../working/output_ics/" "" "../index_template.md" "../working/index.md"
         working-directory: "external-scripts"
+      
+      - name: "DEBUG: Show tree"
+        run: tree .
         
       - name: Move/Override builded ics files
         run: mv -f "working/output_ics/*" "docs/"
