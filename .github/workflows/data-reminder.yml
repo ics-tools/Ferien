@@ -1,0 +1,19 @@
+name: Yearly add data reminder
+on:
+  schedule:
+    - cron: "36 10 15 10 *"
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Calculate and set next year
+        run: echo "::set-output name=NEXT_YEAR::$(date -d "$(date +%Y-1-1) 1 year" +%-Y)"
+        id: calculate-next-year
+
+      - name: Open new issue as reminder/todo
+        uses: rishabhgupta/git-action-issue@v2
+        id: Issue
+        with:
+            token: ${{ secrets.GITHUB_TOKEN }}
+            title: "Missing data for ${{ steps.calculate-next-year.outputs.NEXT_YEAR }}"
+            body: "Please add the data for the year ${{ steps.calculate-next-year.outputs.NEXT_YEAR }}."
