@@ -1,0 +1,63 @@
+name: Build ics and index files and publish
+on:
+  push:
+    branches: [ master, ci ]
+    paths:
+      - "yearly_ics/**"
+      - "scripts/**"
+      - ".github/workflows/**"
+      - "docs/**"
+  workflow_dispatch:
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout ferien
+        uses: actions/checkout@v2
+        
+      - name: Checkout scripts
+        uses: actions/checkout@v2
+        with:
+          repository: ics-tools/scripts
+          path: "external-scripts"
+        
+      - name: Set up Python 3
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.X'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        working-directory: "scripts"
+
+      - name: Create working directory
+        run: mkdir -p working
+
+      - name: Build ics files
+        run: python combinder.py
+        working-directory: "scripts"
+      
+      - name: Generate index tree
+        run: python3 generate_index.py "../working/output_ics/" "" "../index_template.md" "../working/index.md"
+        working-directory: "external-scripts"
+        
+      - name: Move/Override builded ics files
+        run: mv -f "working/output_ics/*" "docs/"
+        
+      - name: Move/Override index.md
+        run: mv -f "working/index.md" "docs/"
+        
+      - name: Push public files
+        uses: actions-x/commit@v2
+        with:
+          email: actions@github.com
+          name: GitHub Actions
+          branch: public
+          message: Update files
+          files: docs/
+          token: ${{ secrets.GITHUB_TOKEN }}
+          force: true
