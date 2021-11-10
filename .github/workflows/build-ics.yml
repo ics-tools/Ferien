@@ -49,7 +49,7 @@ jobs:
         run: tree .
         
       - name: Move/Override builded ics files
-        run: mv -f "working/output_ics/*" "docs/"
+        run: mv -f working/output_ics/* "docs/"
         
       - name: Move/Override index.md
         run: mv -f "working/index.md" "docs/"
